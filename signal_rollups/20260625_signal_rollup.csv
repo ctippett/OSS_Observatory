@@ -1,0 +1,6 @@
+date,domain,surface,signal_type,half_life,story_count,volume,arc
+2026-06-24,SaaS Identity & Third-Party Risk / AI-Powered Market Intelligence,Klue Salesforce/Gong Integration (Icarus OAuth Token Theft),Structural Shift,Long,1,Low,2.2 SBOM & Supply-Chain Transparency
+2026-06-24,Network Infrastructure / Telecom & Enterprise Communications,Cisco Catalyst SD-WAN Manager & Unified Communications Manager,Structural Shift,Long,1,Low,
+2026-06-24,Initial Access Brokerage / Living-off-Trusted-Binaries,Corporate Windows Endpoints (Mistic Backdoor),Incident,Medium,1,Low,2.4 CyberCrime & Adversary Economics
+2026-06-23,Healthcare / AI-Powered Utilization Management,Xsolis Utilization-Management Platform,Incident,Medium,1,Low,
+2026-06-23,Aviation / Critical Infrastructure,Flughafen Wien AG / Vienna Airport (Bashe),Incident,Short,1,Low,2.4 CyberCrime & Adversary Economics
