@@ -5,7 +5,10 @@ from pathlib import Path
 from jsonschema import ValidationError, validate
 
 
-SCHEMA_FILE = Path("schemas/cyberbrief.schema.json")
+# Resolve relative to this script's own location (repo-root/validators/), not the
+# caller's current working directory, so this works regardless of where/how it is invoked
+# (e.g. from a scheduled-task session whose cwd is unpredictable).
+SCHEMA_FILE = Path(__file__).resolve().parent.parent / "schemas" / "cyberbrief.schema.json"
 
 
 def load_json(file_path: Path) -> dict:

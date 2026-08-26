@@ -24,15 +24,13 @@ The canonical record contains the following top-level fields:
 | ----------------------------- | ------------------------------------------------------------------------------------------ |
 | `date`                        | Identifies the date represented by the daily CyberBrief.                                   |
 | `items`                       | Contains the individual cybersecurity signals selected for the daily record.               |
-| `signal_counts`               | Summarizes the number of signals represented in the briefing by signal classification.     |
-| `iad_lens`                    | Preserves the briefing-level Institutional Analysis and Development interpretation.        |
+| `signal_counts`               | Summarizes the number of signals represented in the briefing by signal classification.     |       |
 | `micro_tracking`              | Captures observations associated with specifically monitored research areas.               |
 | `inflection_watch`            | Records whether evidence of a potentially meaningful structural inflection was identified. |
 | `longitudinal_arcs`           | Connects the day's observations to longer-running CyberBrief research arcs.                |
 | `daily_narrative`             | Preserves the day's aggregate analytical interpretation of the collected signals.          |
 | `adversary_spotlight`         | Captures the day's selected adversary and associated analytical context.                   |
-| `strategic_insights`          | Captures higher-order insights derived from the day's signals.                             |
-| `industry_research_reference` | Preserves the recurring industry research reference associated with the CyberBrief.        |
+| `strategic_insights`          | Captures higher-order insights derived from the day's signals.                             |    |
 
 These top-level fields collectively preserve the daily CyberBrief as a single research record containing both the underlying selected signals and the analytical interpretation generated from them.
 

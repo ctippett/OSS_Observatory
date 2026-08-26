@@ -1,0 +1,381 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://oss-observatory.org/schemas/cyberbrief.schema.json",
+  "title": "OSS Observatory Canonical CyberBrief Schema v1",
+  "description": "Machine-readable validation schema for canonical daily CyberBrief research records.",
+  "type": "object",
+  "additionalProperties": false,
+
+  "required": [
+    "date",
+    "signal_counts",
+    "items"
+  ],
+
+  "properties": {
+    "date": {
+      "type": "string",
+      "format": "date"
+    },
+
+    "signal_counts": {
+      "$ref": "#/$defs/signalCounts"
+    },
+
+    "items": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/briefItem"
+      }
+    },
+
+    "micro_tracking": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/microTracking"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+
+    "inflection_watch": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+
+    "longitudinal_arcs": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/longitudinalArcs"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+
+    "daily_narrative": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+
+    "adversary_spotlight": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/adversarySpotlight"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+
+    "strategic_insights": {
+      "anyOf": [
+        {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+
+  "$defs": {
+    "signalCounts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "structural_shift",
+        "policy_evolution",
+        "incident"
+      ],
+      "properties": {
+        "structural_shift": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "policy_evolution": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "incident": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+
+    "briefItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "title",
+        "date",
+        "source",
+        "domain",
+        "surface",
+        "signal_type",
+        "half_life",
+        "ai_impact",
+        "arc",
+        "iad_signal",
+        "summary",
+        "extracted_statistics",
+        "breach_specifics"
+      ],
+      "properties": {
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+
+        "date": {
+          "type": "string",
+          "format": "date"
+        },
+
+        "source": {
+          "type": "string",
+          "minLength": 1
+        },
+
+        "domain": {
+          "type": "string",
+          "minLength": 1
+        },
+
+        "surface": {
+          "type": "string",
+          "minLength": 1
+        },
+
+        "signal_type": {
+          "type": "string",
+          "enum": [
+            "Incident",
+            "Policy Evolution",
+            "Structural Shift"
+          ]
+        },
+
+        "half_life": {
+          "type": "string",
+          "enum": [
+            "Short",
+            "Medium",
+            "Long"
+          ]
+        },
+
+        "ai_impact": {
+          "type": "string",
+          "enum": [
+            "None",
+            "Enabling",
+            "Amplifying",
+            "Governing",
+            "Targeted"
+          ]
+        },
+
+        "arc": {
+          "type": "string"
+        },
+
+        "iad_signal": {
+          "$ref": "#/$defs/iadSignal"
+        },
+
+        "summary": {
+          "type": "string",
+          "minLength": 1
+        },
+
+        "extracted_statistics": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+
+        "breach_specifics": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/breachSpecifics"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+
+    "iadSignal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "relevance",
+        "dimensions"
+      ],
+      "properties": {
+        "relevance": {
+          "type": "string",
+          "enum": [
+            "None",
+            "Low",
+            "Medium",
+            "High"
+          ]
+        },
+
+        "dimensions": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "enum": [
+              "Actors",
+              "Rules-in-Use",
+              "Arena",
+              "Incentives",
+              "Interactions",
+              "Outcomes",
+              "Levers"
+            ]
+          }
+        }
+      },
+
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "relevance": {
+                "const": "None"
+              }
+            },
+            "required": [
+              "relevance"
+            ]
+          },
+          "then": {
+            "properties": {
+              "dimensions": {
+                "maxItems": 0
+              }
+            }
+          }
+        }
+      ]
+    },
+
+    "breachSpecifics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "victim",
+        "actor",
+        "vector",
+        "data",
+        "status"
+      ],
+      "properties": {
+        "victim": {
+          "type": "string"
+        },
+        "actor": {
+          "type": "string"
+        },
+        "vector": {
+          "type": "string"
+        },
+        "data": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        }
+      }
+    },
+
+    "microTracking": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "registry_abuse",
+        "llm_misuse"
+      ],
+      "properties": {
+        "registry_abuse": {
+          "type": "string"
+        },
+        "llm_misuse": {
+          "type": "string"
+        }
+      }
+    },
+
+    "longitudinalArcs": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+
+    "adversarySpotlight": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "actor",
+        "classification",
+        "known_aliases",
+        "attributed_nation",
+        "active_since",
+        "todays_relevance",
+        "ttps_today",
+        "historical_pattern"
+      ],
+      "properties": {
+        "actor": {
+          "type": "string"
+        },
+        "classification": {
+          "type": "string"
+        },
+        "known_aliases": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "attributed_nation": {
+          "type": "string"
+        },
+        "active_since": {
+          "type": "string"
+        },
+        "todays_relevance": {
+          "type": "string"
+        },
+        "ttps_today": {
+          "type": "string"
+        },
+        "historical_pattern": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}
