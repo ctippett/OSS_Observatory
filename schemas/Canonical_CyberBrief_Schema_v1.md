@@ -118,6 +118,7 @@ Each item contains the following core fields:
 | `title`                | Provides a concise human-readable identifier for the signal or development.                                |
 | `date`                 | Records the date associated with the observed development.                                                 |
 | `source`               | Identifies the source or sources from which the signal was collected.                                      |
+| `source_urls`          | Preserves the URL(s) of the evidence supporting the signal.                                                 |
 | `domain`               | Classifies the signal within the CyberBrief research domain taxonomy.                                      |
 | `surface`              | Identifies the primary technical, institutional, operational, or ecosystem surface affected by the signal. |
 | `signal_type`          | Classifies the nature and expected analytical significance of the observed signal.                         |
@@ -335,6 +336,24 @@ When applicable, Schema v1 preserves the mature implementation's structured brea
 * `status`
 
 These fields preserve information about the affected organization or population, attributed actor when known, compromise vector, exposed or affected data, and current breach or disclosure status.
+
+### 4.14 `source_urls`
+
+**Purpose:** Preserves the URL(s) of the evidence supporting the signal, independent of the `source` field's descriptive name(s).
+
+**Type:** Array of strings
+
+**Required:** Yes
+
+`source_urls` contains at least one URL. It may contain more than one when multiple sources materially support the observation.
+
+```json
+"source_urls": [
+  "https://example.com/article"
+]
+```
+
+The field preserves only the URL(s) themselves. Schema v1 does not attach additional per-URL metadata (such as retrieval date, outlet name, or primary/secondary classification) to `source_urls` — that remains a candidate for future schema evolution rather than a v1 requirement.
 
 
 5. Analytical and Longitudinal Structures

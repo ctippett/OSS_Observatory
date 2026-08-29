@@ -98,6 +98,27 @@ One emerging trend, one policy or market implication, one blind spot or quiet ar
 ### 2.12 Industry Research Reference (persistent baseline)
 A cumulative list of key industry or vendor research used as structural baselines. Append only when a genuinely new report is released; once added, entries persist across briefs. Do not summarize or analyze here — see Section 3.3 for where this lives (TXT-only).
 
+### 2.13 Source universe (coverage baseline, not an allowlist)
+Research should cover the established CyberBrief source universe below as a coverage baseline. This is not an allowlist: the LLM remains free to discover and use additional credible sources relevant to today's signals, beyond this universe.
+
+- **Government:** CISA, FBI, DOJ, EUROPOL, ENISA, NCSC, CERT-EU, JPCERT/CC, ACSC (Australia)
+- **Policy & Research:** RAND, Brookings, MITRE, Atlantic Council, Carnegie Endowment (Cyber Policy Initiative), CFR, Lawfare, UK AI Security Institute (AISI), The Alan Turing Institute
+- **Journalism & Tech Industry:** KrebsOnSecurity, BleepingComputer, Ars Technica, CyberScoop, Wired, The Record, Bloomberg Tech, Microsoft, Meta, Amazon, Google, Bloomberg, NYT, Hacker News, Dark Reading, TechCrunch Security
+- **Vendor & Security Research:** Mandiant/Google Cloud Threat Intelligence, CrowdStrike Blog, Cisco Talos/TalosIntelligence, Palo Alto Unit 42, Wiz, Checkmarx, Sysdig, Recorded Future, Rapid7, SentinelLabs, Cyble, Black Duck, Synopsys, Microsoft Threat Intelligence (MSTIC), ESET Research, Check Point Research
+- **Ethical Hacker & Bug Bounty:** HackerOne Hacktivity, Bugcrowd Blog
+- **OSINT/Social:** Reddit, X, LinkedIn, Telegram, Dark Web forums, Mastodon/Fediverse security communities, GitHub repositories
+- **Primary Breach Disclosures:** SEC EDGAR Form 8-K Item 1.05, HHS OCR Breach Portal, State AG notification sites, UK ICO, OAIC (Australia), CNIL (France)
+- **Secondary Breach Tracking:** DataBreaches.net, Have I Been Pwned (HIBP) blog/announcements
+
+### 2.14 Evidence quality
+Use evidence appropriate to the claim. Prefer primary and authoritative sources when available. Use credible secondary reporting for discovery and context. Corroborate material claims when the underlying evidence is uncertain, disputed, indirect, or based primarily on secondary reporting. This is a governing principle, not a mechanical two-source requirement.
+
+### 2.15 Collection versus selection
+Source discovery and research (Sections 2.13-2.14) produces candidate developments, not final signals. The existing selection criteria in Section 2.7 — unchanged, including the up-to-6-items guidance ("fewer is acceptable") — determine which candidates become final CyberBrief items.
+
+### 2.16 Evidence preservation (source URLs)
+For every selected CyberBrief item, preserve the HTTP/HTTPS URL(s) of the evidence actually used to support that observation — not every page encountered during research, only evidence materially used to support the selected observation. These URLs become the item's required `source_urls` array in the canonical JSON record (Section 4.3). `source` remains the separate human-readable source/outlet field; `source_urls` holds one or more supporting evidence URLs.
+
 ---
 
 ## 3. Writing the TXT brief (human-readable artifact)
@@ -135,7 +156,7 @@ Per `cyberbrief.schema.json`:
 - No other top-level keys are permitted (`additionalProperties: false`).
 
 ### 4.3 Required item shape
-Each entry in `items` requires: `title`, `date`, `source`, `domain`, `surface`, `signal_type` (`Incident` | `Policy Evolution` | `Structural Shift`), `half_life` (`Short` | `Medium` | `Long`), `ai_impact` (`None` | `Enabling` | `Amplifying` | `Governing` | `Targeted`), `arc`, `iad_signal`, `summary`, `extracted_statistics` (array, may be empty), `breach_specifics` (object or `null` — required internal shape specified in Section 4.5). No other item keys are permitted.
+Each entry in `items` requires: `title`, `date`, `source`, `source_urls` (array of one or more HTTP/HTTPS evidence URLs — see Section 2.16 for what to preserve; `source` stays the human-readable source/outlet field, `source_urls` is separate and required), `domain`, `surface`, `signal_type` (`Incident` | `Policy Evolution` | `Structural Shift`), `half_life` (`Short` | `Medium` | `Long`), `ai_impact` (`None` | `Enabling` | `Amplifying` | `Governing` | `Targeted`), `arc`, `iad_signal`, `summary`, `extracted_statistics` (array, may be empty), `breach_specifics` (object or `null` — required internal shape specified in Section 4.5). No other item keys are permitted.
 
 ### 4.4 `iad_signal` (item-level, JSON-only)
 For every item, set:

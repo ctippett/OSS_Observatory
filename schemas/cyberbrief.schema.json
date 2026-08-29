@@ -123,6 +123,7 @@
         "title",
         "date",
         "source",
+        "source_urls",
         "domain",
         "surface",
         "signal_type",
@@ -148,6 +149,16 @@
         "source": {
           "type": "string",
           "minLength": 1
+        },
+
+        "source_urls": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^https?://"
+          }
         },
 
         "domain": {
