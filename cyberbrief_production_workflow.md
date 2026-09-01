@@ -38,6 +38,8 @@ A CyberBrief run is eight stages, in order:
 
 The critical architectural point: **steps 3 and 4 are siblings, not a pipeline.** Both are produced from the analytical brief built in step 2. The TXT is not parsed to build the JSON, and the JSON is not summarized to build the TXT. This is what eliminates the schema drift that comes from treating one artifact as a rendering of the other.
 
+Every run also produces a **run record** — a small, human-readable audit artifact tracking when the run happened, which stages completed, and why any stage failed or was skipped. It is created before stage 1 begins and updated as each stage above completes, fails, or is skipped. It is not part of the CyberBrief methodology or the Schema v1 contract, is not gated by validation, and is preserved even for a failed or partial run. See Section 12.
+
 ---
 
 ## 2. Research and analytical methodology (behavioral baseline — preserved)
@@ -267,6 +269,8 @@ python3 OSS_Observatory/validators/cyberbrief_validator.py CyberBrief/Data/.cand
 ### 5.1 On success
 `CYBERBRIEF PASSED VALIDATION`. Promote the candidate: copy/rename it to `CyberBrief/Data/YYYYMMDD_cyberbrief.json`. Proceed to Section 6.
 
+Update the run record (Section 12.4): mark stage 4 (Schema validation) `PASS`, and mark stage 5 (Canonical JSON promotion) `DONE` with the promoted canonical path.
+
 ### 5.2 On failure
 The validator exits non-zero and prints `CYBERBRIEF FAILED VALIDATION`, the exact `Reason:`, and the `Location:` (JSON path) of the offending field. When this happens:
 
@@ -278,6 +282,7 @@ The validator exits non-zero and prints `CYBERBRIEF FAILED VALIDATION`, the exac
 - **Do not silently weaken or modify the schema to make the output pass.**
 - Leave the invalid file at its candidate path (do not delete it — it's the evidence) and do not touch the existing canonical JSON for that date, if one already exists.
 - The TXT brief (Section 3) may still be presented on its own merits — TXT output is not gated by JSON validation — but the run as a whole is not complete until the JSON is valid, and that should be stated plainly rather than left implicit.
+- Update the run record (Section 12.4): mark stage 4 (Schema validation) `FAIL`, copying the validator's `Reason:` and `Location:` output into the run record verbatim, and mark stages 5-8 (Canonical JSON promotion, CSV roll-up, MORNING_BRIEF.md update, Long Half-Life tracker update) `SKIPPED (validation failed)`. The run record itself is still written — it is the evidence of the failure, not something withheld because the run failed.
 
 ---
 
@@ -304,11 +309,15 @@ Only after a successful validation and promotion (Section 5.1):
 
 If the tracker file is locked (e.g. open in Excel — check for a `.~lock.*#` file alongside it before writing), do not force a write; note it in the run's presentation output and let Charles know it needs to be updated once the file is closed.
 
+Update the run record (Section 12.3) for each of the two trackers independently: mark stage 7 (MORNING_BRIEF.md update) and stage 8 (Long Half-Life tracker update) each `DONE` or `SKIPPED (<reason>)`. A locked tracker is recorded on its own line, e.g. `SKIPPED (locked: .~lock.LongHalfLife_Tracker_May2026.xlsx#)` — this is the durable record of the skip, in addition to telling Charles in the run's presentation output.
+
 ---
 
 ## 8. Present the finished brief
 
 Present the brief to Charles as today's CyberBrief. State plainly which of the three artifacts (TXT, JSON, CSV) were produced and, if the JSON failed validation, that the run is incomplete pending a fix — do not present a partial or invalid run as a normal, successful one.
+
+Finalize the run record (Section 12.6): add the `Run completed` timestamp and confirm stage 9 (Brief presentation) is marked `DONE`, and that the other eight stage lines already reflect the run's actual outcome.
 
 ---
 
@@ -323,6 +332,8 @@ Present the brief to Charles as today's CyberBrief. State plainly which of the t
 | Signal roll-up CSV | `CyberBrief/Data/YYYYMMDD_signal_rollup.csv` |
 | Morning brief | `CyberBrief/Briefs/MORNING_BRIEF.md` |
 | Long Half-Life tracker | `CyberBrief/Data/LongHalfLife/LongHalfLife_Tracker_May2026.xlsx` |
+| Run record | `CyberBrief/Data/YYYYMMDD_run_record.md` |
+| Run record (retrospective) | `CyberBrief/Data/<start>_<end>_run_record.md` |
 
 These are the existing production locations and naming conventions. This workflow does not rename, reorganize, or migrate any existing file, and does not populate `OSS_Observatory/cyberbriefs/` with daily production artifacts — that directory is not part of the live production path.
 
@@ -344,3 +355,98 @@ The scheduled task, and any manual Cowork run, should use this file as sole auth
 > Read and follow the complete production workflow at `OSS_Observatory/cyberbrief_production_workflow.md` (absolute path: `/Users/charles.tippett/Documents/DoGoodData/OSS_Observatory/cyberbrief_production_workflow.md`). Treat that file as the authoritative and complete operating instructions for this CyberBrief run. If you do not have file access to that path yet, request access to `/Users/charles.tippett/Documents/DoGoodData` before proceeding.
 
 The explicit absolute path and the fallback access-request sentence are the "minimal additional launcher language" needed for reliable file access in a fresh scheduled-task session that starts with no folder connected (see the external-instructions mechanism test, reported separately). This launcher text is not itself the workflow and should not be expanded — if the workflow needs to change, change this file, not the launcher.
+
+---
+
+## 12. Run record (audit artifact)
+
+Every CyberBrief run — whether it succeeds, fails, or is only partially completed — produces one run record. Its purpose is narrow: let a run's outcome be reconstructed from disk alone, six months later, without relying on chat or conversation history. It supplements the artifacts and gates already defined in Sections 3-8 and changes nothing about the CyberBrief methodology, Schema v1, the validator, or existing failure semantics.
+
+### 12.1 Location and naming
+
+- Daily run: `CyberBrief/Data/YYYYMMDD_run_record.md`
+- Retrospective run: `CyberBrief/Data/<start>_<end>_run_record.md`
+
+Same date-naming convention and same `CyberBrief/Data/` location as the canonical JSON and CSV (Section 9). Each run produces its own dated file; never overwrite or delete a prior date's run record.
+
+### 12.2 Creation
+
+Create the run record first, before Section 2 (Research) begins, with:
+
+- `Run started` — current timestamp, ISO 8601 with timezone offset.
+- `Run type` — `Daily` or `Retrospective (<start>–<end>)`.
+- `Workflow ref` — `OSS_Observatory/cyberbrief_production_workflow.md`.
+- `Workflow commit` — the current Git commit hash of the OSS_Observatory repository, captured via `git -C OSS_Observatory rev-parse HEAD` (or the equivalent invocation from the run's working directory). If the repository or command is unavailable, record `unknown` rather than blocking the run.
+- The nine-stage checklist below (Section 12.3), all stages initially marked `PENDING`.
+
+### 12.3 Stage checklist and updates
+
+The run record tracks nine stages, each updated in place as it is reached:
+
+1. Research / analytical brief (Section 2)
+2. TXT generation (Section 3)
+3. Candidate JSON generation (Section 4)
+4. Schema validation (Section 5)
+5. Canonical JSON promotion (Section 5.1)
+6. CSV roll-up (Section 6)
+7. MORNING_BRIEF.md update (Section 7)
+8. Long Half-Life tracker update (Section 7)
+9. Brief presentation (Section 8)
+
+Each stage is updated to exactly one of `DONE`, `SKIPPED (<reason>)`, or — stage 4 only — `PASS`/`FAIL` (Section 12.4). Where a stage produces a canonical artifact, record its path on the same line, e.g.:
+
+```
+2. TXT generation                    DONE  -> CyberBrief/Briefs/YYYYMMDD_cyberbrief.txt
+```
+
+### 12.4 Recording validation
+
+Stage 4 (Schema validation) is recorded as `PASS` or `FAIL`, per Section 5.
+
+On `PASS`: stage 5 (Canonical JSON promotion) is marked `DONE` with the promoted canonical path, per Section 5.1, and the run proceeds normally through stages 6-9.
+
+On `FAIL`: copy the validator's `Reason:` and `Location:` output into the run record verbatim beneath stage 4, then mark stages 5-8 (Canonical JSON promotion, CSV roll-up, MORNING_BRIEF.md update, Long Half-Life tracker update) `SKIPPED (validation failed)`, matching the existing prohibitions in Section 5.2. Stage 9 (Brief presentation) is still marked `DONE` once Section 8 reports the failed run to Charles — the run record does not change what gets presented, only confirms that the presentation happened.
+
+### 12.5 Recording nonfatal exceptions
+
+A stage skipped for a reason other than validation failure (for example, Section 7's locked-tracker case) is recorded on its own line with a one-line cause, not a separate log:
+
+```
+8. Long Half-Life tracker update     SKIPPED (locked: .~lock.LongHalfLife_Tracker_May2026.xlsx#)
+```
+
+### 12.6 Completion
+
+At Section 8 (Present), add `Run completed` with a timestamp and confirm the final status of all nine stages reflects the run's actual outcome.
+
+### 12.7 Preservation
+
+The run record is written and updated regardless of validation outcome. Unlike the canonical JSON and CSV (Sections 4.9 and 6), it is not gated behind validation success — its purpose is specifically to preserve evidence of failed or partial runs. Do not fold it into, or derive it from, the canonical JSON, the TXT brief, or MORNING_BRIEF.md; it is a separate, minimal artifact.
+
+### 12.8 Template
+
+```
+# CyberBrief Run Record — YYYY-MM-DD
+
+Run started:      YYYY-MM-DDTHH:MM:SS±TZ
+Run type:         Daily
+Workflow ref:     OSS_Observatory/cyberbrief_production_workflow.md
+Workflow commit:  <git commit hash | unknown>
+
+## Stage status
+1. Research / analytical brief       PENDING
+2. TXT generation                    PENDING
+3. Candidate JSON generation         PENDING
+4. Schema validation                 PENDING
+5. Canonical JSON promotion          PENDING
+6. CSV roll-up                       PENDING
+7. MORNING_BRIEF.md update           PENDING
+8. Long Half-Life tracker update     PENDING
+9. Brief presentation                PENDING
+
+Run completed:     (not yet complete)
+```
+
+### 12.9 Scope
+
+The run record is a single flat Markdown file per run — not a database, not a logging framework, not a telemetry system, and not a general audit subsystem. It does not track anything beyond the nine stages above. If future needs exceed what this file can hold, that is a deliberate design change to make explicitly, not a reason to let this section drift.
