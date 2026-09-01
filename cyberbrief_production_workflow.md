@@ -38,7 +38,7 @@ A CyberBrief run is eight stages, in order:
 
 The critical architectural point: **steps 3 and 4 are siblings, not a pipeline.** Both are produced from the analytical brief built in step 2. The TXT is not parsed to build the JSON, and the JSON is not summarized to build the TXT. This is what eliminates the schema drift that comes from treating one artifact as a rendering of the other.
 
-Every run also produces a **run record** — a small, human-readable audit artifact tracking when the run happened, which stages completed, and why any stage failed or was skipped. It is created before stage 1 begins and updated as each stage above completes, fails, or is skipped. It is not part of the CyberBrief methodology or the Schema v1 contract, is not gated by validation, and is preserved even for a failed or partial run. See Section 12.
+Every run also produces a **run record** — a small, human-readable audit artifact tracking when the run happened, which stages completed, and why any stage failed or was skipped. It is created before stage 1 begins and updated as each stage above completes, fails, or is skipped. When execution includes a material event a stage's final status alone would not accurately convey — a correction after validation or promotion, a repeated validation or promotion, or similar — that event is also logged in the run record's Execution Notes. It is not part of the CyberBrief methodology or the Schema v1 contract, is not gated by validation, and is preserved even for a failed or partial run. See Section 12.
 
 ---
 
@@ -269,7 +269,7 @@ python3 OSS_Observatory/validators/cyberbrief_validator.py CyberBrief/Data/.cand
 ### 5.1 On success
 `CYBERBRIEF PASSED VALIDATION`. Promote the candidate: copy/rename it to `CyberBrief/Data/YYYYMMDD_cyberbrief.json`. Proceed to Section 6.
 
-Update the run record (Section 12.4): mark stage 4 (Schema validation) `PASS`, and mark stage 5 (Canonical JSON promotion) `DONE` with the promoted canonical path.
+Update the run record (Section 12.5): mark stage 4 (Schema validation) `PASS`, and mark stage 5 (Canonical JSON promotion) `DONE` with the promoted canonical path. If this validation or promotion is not the first attempt for this date, also log it in Execution Notes (Section 12.4).
 
 ### 5.2 On failure
 The validator exits non-zero and prints `CYBERBRIEF FAILED VALIDATION`, the exact `Reason:`, and the `Location:` (JSON path) of the offending field. When this happens:
@@ -282,7 +282,7 @@ The validator exits non-zero and prints `CYBERBRIEF FAILED VALIDATION`, the exac
 - **Do not silently weaken or modify the schema to make the output pass.**
 - Leave the invalid file at its candidate path (do not delete it — it's the evidence) and do not touch the existing canonical JSON for that date, if one already exists.
 - The TXT brief (Section 3) may still be presented on its own merits — TXT output is not gated by JSON validation — but the run as a whole is not complete until the JSON is valid, and that should be stated plainly rather than left implicit.
-- Update the run record (Section 12.4): mark stage 4 (Schema validation) `FAIL`, copying the validator's `Reason:` and `Location:` output into the run record verbatim, and mark stages 5-8 (Canonical JSON promotion, CSV roll-up, MORNING_BRIEF.md update, Long Half-Life tracker update) `SKIPPED (validation failed)`. The run record itself is still written — it is the evidence of the failure, not something withheld because the run failed.
+- Update the run record (Section 12.5): mark stage 4 (Schema validation) `FAIL`, copying the validator's `Reason:` and `Location:` output into the run record verbatim, and mark stages 5-8 (Canonical JSON promotion, CSV roll-up, MORNING_BRIEF.md update, Long Half-Life tracker update) `SKIPPED (validation failed)`. The run record itself is still written — it is the evidence of the failure, not something withheld because the run failed. If a corrected candidate is subsequently validated for the same date, log the correction and the repeated validation in Execution Notes (Section 12.4).
 
 ---
 
@@ -317,7 +317,7 @@ Update the run record (Section 12.3) for each of the two trackers independently:
 
 Present the brief to Charles as today's CyberBrief. State plainly which of the three artifacts (TXT, JSON, CSV) were produced and, if the JSON failed validation, that the run is incomplete pending a fix — do not present a partial or invalid run as a normal, successful one.
 
-Finalize the run record (Section 12.6): add the `Run completed` timestamp and confirm stage 9 (Brief presentation) is marked `DONE`, and that the other eight stage lines already reflect the run's actual outcome.
+Finalize the run record (Section 12.7): add the `Run completed` timestamp and confirm stage 9 (Brief presentation) is marked `DONE`, and that the other eight stage lines already reflect the run's actual outcome. Confirm also that Execution Notes (Section 12.4) reflects every material event from the run, not just the final state.
 
 ---
 
@@ -378,6 +378,7 @@ Create the run record first, before Section 2 (Research) begins, with:
 - `Workflow ref` — `OSS_Observatory/cyberbrief_production_workflow.md`.
 - `Workflow commit` — the current Git commit hash of the OSS_Observatory repository, captured via `git -C OSS_Observatory rev-parse HEAD` (or the equivalent invocation from the run's working directory). If the repository or command is unavailable, record `unknown` rather than blocking the run.
 - The nine-stage checklist below (Section 12.3), all stages initially marked `PENDING`.
+- An empty `## Execution Notes` section (Section 12.4), initially `(none)`.
 
 ### 12.3 Stage checklist and updates
 
@@ -393,13 +394,32 @@ The run record tracks nine stages, each updated in place as it is reached:
 8. Long Half-Life tracker update (Section 7)
 9. Brief presentation (Section 8)
 
-Each stage is updated to exactly one of `DONE`, `SKIPPED (<reason>)`, or — stage 4 only — `PASS`/`FAIL` (Section 12.4). Where a stage produces a canonical artifact, record its path on the same line, e.g.:
+Each stage is updated to exactly one of `DONE`, `SKIPPED (<reason>)`, or — stage 4 only — `PASS`/`FAIL` (Section 12.5). Where a stage produces a canonical artifact, record its path on the same line, e.g.:
 
 ```
 2. TXT generation                    DONE  -> CyberBrief/Briefs/YYYYMMDD_cyberbrief.txt
 ```
 
-### 12.4 Recording validation
+Each stage field holds only that stage's final status. It is not a history: if a stage was attempted, corrected, or repeated more than once before reaching that final status, the checklist line alone does not preserve that — log it in Execution Notes (Section 12.4) instead.
+
+### 12.4 Execution Notes (material execution events)
+
+The nine-stage checklist (Section 12.3) is deliberately single-valued — each stage holds one final status. It is not designed to hold a history of retries, corrections, or repeated attempts, and should not be stretched to do so.
+
+When execution includes a material event that the final stage status alone would not accurately convey, append a concise, chronological entry to the run record's `## Execution Notes` section (Section 12.9 template). Material events include, without limitation:
+
+- correcting an artifact after it has already been validated or promoted;
+- validating a candidate more than once for the same date;
+- promoting a canonical artifact more than once for the same date;
+- regenerating a downstream artifact (for example the CSV, `MORNING_BRIEF.md`, or a tracker entry) because an upstream artifact it depends on changed after the downstream artifact was first produced;
+- recovering from, or retrying after, a failure;
+- any other execution event needed to reconstruct, from the run record alone, how the run reached its final canonical state.
+
+Each entry must describe what actually occurred, including any intermediate state that was later superseded — not restate only the final successful outcome. Entries are appended in the order the events happened and are never edited or deleted once written, so the section reads as a chronological account rather than a summary. Do not log ordinary, single-pass stage completions here — Execution Notes exists only for what the Section 12.3 checklist cannot represent.
+
+Execution Notes is a plain, append-only list of short entries within the same run-record file — not a separate log file, a database, or an artifact-versioning mechanism. An entry describes what happened to a superseded artifact (what it contained, why it was superseded, and by what); it does not require retaining the superseded artifact itself, which is why this requires no new file-preservation, versioning, or logging infrastructure.
+
+### 12.5 Recording validation
 
 Stage 4 (Schema validation) is recorded as `PASS` or `FAIL`, per Section 5.
 
@@ -407,7 +427,7 @@ On `PASS`: stage 5 (Canonical JSON promotion) is marked `DONE` with the promoted
 
 On `FAIL`: copy the validator's `Reason:` and `Location:` output into the run record verbatim beneath stage 4, then mark stages 5-8 (Canonical JSON promotion, CSV roll-up, MORNING_BRIEF.md update, Long Half-Life tracker update) `SKIPPED (validation failed)`, matching the existing prohibitions in Section 5.2. Stage 9 (Brief presentation) is still marked `DONE` once Section 8 reports the failed run to Charles — the run record does not change what gets presented, only confirms that the presentation happened.
 
-### 12.5 Recording nonfatal exceptions
+### 12.6 Recording nonfatal exceptions
 
 A stage skipped for a reason other than validation failure (for example, Section 7's locked-tracker case) is recorded on its own line with a one-line cause, not a separate log:
 
@@ -415,15 +435,15 @@ A stage skipped for a reason other than validation failure (for example, Section
 8. Long Half-Life tracker update     SKIPPED (locked: .~lock.LongHalfLife_Tracker_May2026.xlsx#)
 ```
 
-### 12.6 Completion
+### 12.7 Completion
 
-At Section 8 (Present), add `Run completed` with a timestamp and confirm the final status of all nine stages reflects the run's actual outcome.
+At Section 8 (Present), add `Run completed` with a timestamp and confirm the final status of all nine stages reflects the run's actual outcome. Execution Notes is not summarized or cleared at completion — every entry logged during the run remains in the file exactly as written.
 
-### 12.7 Preservation
+### 12.8 Preservation
 
-The run record is written and updated regardless of validation outcome. Unlike the canonical JSON and CSV (Sections 4.9 and 6), it is not gated behind validation success — its purpose is specifically to preserve evidence of failed or partial runs. Do not fold it into, or derive it from, the canonical JSON, the TXT brief, or MORNING_BRIEF.md; it is a separate, minimal artifact.
+The run record is written and updated regardless of validation outcome. Unlike the canonical JSON and CSV (Sections 4.9 and 6), it is not gated behind validation success — its purpose is specifically to preserve evidence of failed or partial runs. Do not fold it into, or derive it from, the canonical JSON, the TXT brief, or MORNING_BRIEF.md; it is a separate, minimal artifact. This applies equally to Execution Notes: entries are preserved as written, regardless of the run's final outcome.
 
-### 12.8 Template
+### 12.9 Template
 
 ```
 # CyberBrief Run Record — YYYY-MM-DD
@@ -444,9 +464,12 @@ Workflow commit:  <git commit hash | unknown>
 8. Long Half-Life tracker update     PENDING
 9. Brief presentation                PENDING
 
+## Execution Notes
+(none)
+
 Run completed:     (not yet complete)
 ```
 
-### 12.9 Scope
+### 12.10 Scope
 
-The run record is a single flat Markdown file per run — not a database, not a logging framework, not a telemetry system, and not a general audit subsystem. It does not track anything beyond the nine stages above. If future needs exceed what this file can hold, that is a deliberate design change to make explicitly, not a reason to let this section drift.
+The run record is a single flat Markdown file per run — not a database, not a logging framework, not a telemetry system, and not a general audit subsystem. It does not track anything beyond the nine stages above and the Execution Notes entries described in Section 12.4. Execution Notes does not introduce artifact versioning, a separate validator log, or Git tracking of CyberBrief production data — it is a short list of plain-text entries in the same file, describing events in words rather than preserving the superseded artifacts themselves. If future needs exceed what this file can hold, that is a deliberate design change to make explicitly, not a reason to let this section drift.
