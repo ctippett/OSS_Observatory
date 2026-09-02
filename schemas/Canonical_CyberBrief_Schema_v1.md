@@ -248,17 +248,51 @@ Arc assignments allow individual observations to accumulate into longer-running 
 
 **Required:** Yes
 
-IAD-Signal is a lightweight research marker rather than a completed IAD analysis. It makes only two claims:
+IAD-Signal is a lightweight research marker rather than a completed IAD analysis. Schema v1 preserves its original two claims and adds two optional fields — `dimension_notes` and `mechanism` — that carry a minimum amount of evidence-anchored institutional detail forward when, and only when, the source material actually supports it:
 
-1. How strongly the item appears to warrant later institutional analysis using the IAD lens.
-2. Which IAD dimensions appear potentially relevant based on the information contained in the item.
+1. How strongly the item appears to warrant later institutional analysis using the IAD lens (`relevance`).
+2. Which IAD dimensions appear potentially relevant based on the information contained in the item (`dimensions`).
+3. A concise, evidence-based interpretation for individual dimensions, where the source contains analytically important institutional detail (`dimension_notes`).
+4. A compact statement of how tagged dimensions connect, with each relationship's evidentiary status made explicit (`mechanism`).
 
-The object contains:
+The object contains, at minimum:
 
 ```json
 "iad_signal": {
   "relevance": "High",
   "dimensions": ["Actors", "Rules-in-Use", "Incentives"]
+}
+```
+
+and may optionally extend to:
+
+```json
+"iad_signal": {
+  "relevance": "High",
+  "dimensions": ["Actors", "Rules-in-Use", "Incentives", "Levers", "Outcomes"],
+  "dimension_notes": {
+    "Rules-in-Use": "Court-authorized seizure under an unsealed affidavit, Southern District of California.",
+    "Incentives": "Officials framed the action as the fourth in a named sequence of similar operations since 2023."
+  },
+  "mechanism": {
+    "statement": "A court-authorized domain seizure disabled infrastructure the targeted platforms depended on.",
+    "relationships": [
+      {
+        "from": "Rules-in-Use",
+        "relationship": "enables",
+        "to": "Levers",
+        "status": "Observed",
+        "evidence": "\"DOJ and FBI announced court-authorized seizures of three domains\""
+      },
+      {
+        "from": "Incentives",
+        "relationship": "motivates recurring use of",
+        "to": "Rules-in-Use",
+        "status": "Analytical Inference",
+        "evidence": "framed as the fourth in a named sequence of similar operations since 2023"
+      }
+    ]
+  }
 }
 ```
 
@@ -287,9 +321,33 @@ The object contains:
 * `Outcomes`
 * `Levers`
 
-Zero or more dimensions may be selected. When `relevance` is `None`, `dimensions` must be an empty array.
+Zero or more dimensions may be selected. When `relevance` is `None`, `dimensions` must be an empty array. `dimensions` remains the structured presence layer used for counting and cross-observation aggregation; adding a dimension here is a lower bar than adding a note or relationship for it below.
 
-IAD-Signal identifies **analytical potential only**. It does not assert institutional relationships, causal mechanisms, findings, outcomes, or recommended interventions. Full IAD analysis is a downstream research activity performed at an appropriate unit of analysis.
+#### `dimension_notes` (optional)
+
+**Type:** Object (map of dimension name to string)
+
+**Required:** No — omit entirely, or set to `{}`, when no dimension warrants a note.
+
+Keys are drawn from the same seven-value dimension vocabulary above; values are short, evidence-based interpretations. `dimension_notes` is deliberately sparse: a note is added only when the source contains analytically important institutional evidence for that dimension — specifically, named rules/authorities/statutes/policies/procedures; stated actor reasoning or rationale; meaningful actor interactions or temporal sequences; or an explicitly identified recurring institutional pattern. A dimension may appear in `dimensions` without a corresponding entry in `dimension_notes`; presence and interpretation are separate judgments, and a note must never be added merely to populate every tagged dimension.
+
+#### `mechanism` (optional, nullable)
+
+**Type:** Object or `null`
+
+**Required:** No — omit entirely, or set to `null`, when the item does not support a meaningful relationship between institutional elements.
+
+When present, `mechanism` contains:
+
+* `statement` — a single concise sentence summarizing how the tagged dimensions connect. Not a restatement of `summary`; it exists specifically to name the connection, not the underlying facts.
+* `relationships` — one or more entries, each with `from`, `relationship`, `to`, `status`, and `evidence`. `status` must be exactly one of `Observed`, `Analytical Inference`, or `Hypothesis`:
+  * **Observed** — the connection is stated directly by the source material itself.
+  * **Analytical Inference** — the connection is not stated directly but is reasonably drawn from evidence present in the record; `evidence` must identify that supporting evidence.
+  * **Hypothesis** — the connection is a plausible research question or candidate explanation not yet established by the available evidence; `evidence` describes the reasoning or observation that prompted the hypothesis, not proof of the relationship itself. A hypothesis is a legitimate, valuable research object in its own right (per the Observatory's Observation → Pattern → Hypothesis → Model → Writing research process) and is preserved for that reason — it must never be written, or later read, as an established finding.
+
+`mechanism` cannot be present with a non-null value when `dimensions` is empty — a relationship requires at least one tagged dimension to relate. Schema v1 does not mechanically enforce that every `dimension_notes` key or every relationship endpoint also appears in `dimensions`; that consistency is a drafting responsibility described in the production workflow, not a validation rule.
+
+IAD-Signal identifies **analytical potential**, evidence-anchored interpretation, and (only where the evidence supports it) explicitly-classified relationships. It still does not assert unlabeled causal mechanisms, findings, or recommended interventions, and it does not replace full IAD analysis as a downstream research activity performed at an appropriate unit of analysis. `dimension_notes` and `mechanism` are optional precisely so that thin, low-institutional-content items (see the negative-case guidance in the production workflow) are not forced into manufactured richness.
 
 ### 4.11 `summary`
 
@@ -415,4 +473,5 @@ Inclusion in this section does not imply that a change should be made; each item
 
 Source structure: Schema v1 preserves source as a single string for compatibility with the mature workflow; evaluate whether future versions should represent multiple sources as structured objects or arrays, including source URLs and provenance metadata.
 Domain and surface vocabulary: Schema v1 preserves domain and surface as flexible strings; evaluate accumulated data for vocabulary drift and determine whether controlled taxonomies, normalization, or hierarchical classifications would improve longitudinal analysis.
-IAD-Signal validation: iad_signal is introduced in Schema v1 as a lightweight research marker; evaluate its usefulness after sufficient observations accumulate, including whether relevance levels and IAD dimensions reliably identify candidates for deeper institutional analysis.
+IAD-Signal validation: iad_signal is introduced in Schema v1 as a lightweight research marker, later extended within v1 with optional `dimension_notes` and `mechanism` fields (Requirement 11); evaluate its usefulness after sufficient observations accumulate, including whether relevance levels and IAD dimensions reliably identify candidates for deeper institutional analysis, and whether the hybrid fields hold up across a larger corpus.
+Cross-field consistency for `dimension_notes` and `mechanism`: Schema v1 does not mechanically enforce that `dimension_notes` keys or relationship endpoints are a subset of the tagged `dimensions` array; evaluate whether a future schema version should add that constraint once drafting experience accumulates.

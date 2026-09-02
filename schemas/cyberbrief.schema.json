@@ -266,6 +266,36 @@
               "Levers"
             ]
           }
+        },
+
+        "dimension_notes": {
+          "type": "object",
+          "propertyNames": {
+            "enum": [
+              "Actors",
+              "Rules-in-Use",
+              "Arena",
+              "Incentives",
+              "Interactions",
+              "Outcomes",
+              "Levers"
+            ]
+          },
+          "additionalProperties": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+
+        "mechanism": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/iadMechanism"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
 
@@ -288,8 +318,87 @@
               }
             }
           }
+        },
+        {
+          "if": {
+            "properties": {
+              "dimensions": {
+                "maxItems": 0
+              }
+            },
+            "required": [
+              "dimensions"
+            ]
+          },
+          "then": {
+            "properties": {
+              "mechanism": {
+                "type": "null"
+              }
+            }
+          }
         }
       ]
+    },
+
+    "iadMechanism": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "statement",
+        "relationships"
+      ],
+      "properties": {
+        "statement": {
+          "type": "string",
+          "minLength": 1
+        },
+        "relationships": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/iadRelationship"
+          }
+        }
+      }
+    },
+
+    "iadRelationship": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "from",
+        "relationship",
+        "to",
+        "status",
+        "evidence"
+      ],
+      "properties": {
+        "from": {
+          "type": "string",
+          "minLength": 1
+        },
+        "relationship": {
+          "type": "string",
+          "minLength": 1
+        },
+        "to": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "Observed",
+            "Analytical Inference",
+            "Hypothesis"
+          ]
+        },
+        "evidence": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
     },
 
     "breachSpecifics": {

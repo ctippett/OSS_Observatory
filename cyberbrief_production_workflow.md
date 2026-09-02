@@ -91,6 +91,8 @@ For every selected item, establish: title, date, source, domain, surface, signal
 
 Also assess, per item, the lightweight **IAD-Signal marker**: how strongly the item warrants later institutional analysis through the Institutional Analysis and Development lens, and which IAD dimensions (Actors, Rules-in-Use, Arena, Incentives, Interactions, Outcomes, Levers) appear potentially relevant. This is a relevance-plus-dimensions marker, not a written IAD analysis — see Section 4.4 for exactly how this becomes the JSON-only `iad_signal` field. It is a per-item judgment, independent of whatever day-level "IAD LENS" framing (if any) goes into the TXT brief under Section 3.
 
+When the source material for an item contains analytically important institutional evidence — a named rule, authority, statute, policy, or procedure; stated actor reasoning or rationale; a meaningful actor interaction or temporal sequence; or an explicitly identified recurring institutional pattern — also capture, per dimension, a concise evidence-based interpretation, and, where a relationship between tagged dimensions is actually supported by the evidence, a short mechanism statement. See Section 4.4 for the JSON-only `iad_signal.dimension_notes` and `iad_signal.mechanism` fields this becomes. Do not manufacture this detail where the source doesn't support it — a thin item with only `relevance` and `dimensions` populated (or `relevance: "None"`) remains a correct and complete result.
+
 ### 2.10 Daily Narrative (required)
 Operational synthesis answering: what changed today; did anything escalate, stabilize, or break precedent; and the aggregate role of AI today, in one sentence. No speculation, no restating background conditions.
 
@@ -161,7 +163,7 @@ Per `cyberbrief.schema.json`:
 Each entry in `items` requires: `title`, `date`, `source`, `source_urls` (array of one or more HTTP/HTTPS evidence URLs — see Section 2.16 for what to preserve; `source` stays the human-readable source/outlet field, `source_urls` is separate and required), `domain`, `surface`, `signal_type` (`Incident` | `Policy Evolution` | `Structural Shift`), `half_life` (`Short` | `Medium` | `Long`), `ai_impact` (`None` | `Enabling` | `Amplifying` | `Governing` | `Targeted`), `arc`, `iad_signal`, `summary`, `extracted_statistics` (array, may be empty), `breach_specifics` (object or `null` — required internal shape specified in Section 4.5). No other item keys are permitted.
 
 ### 4.4 `iad_signal` (item-level, JSON-only)
-For every item, set:
+For every item, set at minimum:
 
 ```json
 "iad_signal": {
@@ -171,6 +173,41 @@ For every item, set:
 ```
 
 `dimensions` is zero or more of the seven allowed values; when `relevance` is `"None"`, `dimensions` must be `[]`. This is the JSON-only formalization of the Section 2.9 IAD-Signal marker — assess it from the item itself, per the marker definition in `Canonical_CyberBrief_Schema_v1.md` §4.10. Do not derive it from, or make it depend on, the TXT's day-level "IAD LENS" line (Section 3.2) — they are different things at different levels (item vs. day) serving different purposes (structured marker vs. narrative prose).
+
+#### 4.4.1 `dimension_notes` and `mechanism` (item-level, JSON-only, optional)
+
+`iad_signal` may optionally extend to:
+
+```json
+"iad_signal": {
+  "relevance": "High",
+  "dimensions": ["Actors", "Rules-in-Use", "Incentives", "Levers", "Outcomes"],
+  "dimension_notes": {
+    "Rules-in-Use": "Court-authorized seizure under an unsealed affidavit, Southern District of California."
+  },
+  "mechanism": {
+    "statement": "A court-authorized domain seizure disabled infrastructure the targeted platforms depended on.",
+    "relationships": [
+      {
+        "from": "Rules-in-Use",
+        "relationship": "enables",
+        "to": "Levers",
+        "status": "Observed",
+        "evidence": "\"DOJ and FBI announced court-authorized seizures of three domains\""
+      }
+    ]
+  }
+}
+```
+
+Rules for populating these two fields:
+
+- **`dimension_notes` stays sparse.** Add a note only for a dimension where the source contains analytically important institutional evidence per the Section 2.9 criteria (named rule/authority/statute/policy/procedure; stated actor reasoning; meaningful interaction or temporal sequence; explicitly identified recurring pattern). Do not add a note merely to populate every dimension listed in `dimensions`. Omit the field entirely, or set it to `{}`, when no dimension warrants one.
+- **`mechanism` is optional and all-or-nothing.** Create it only when a relationship between tagged dimensions is actually supported by the evidence in the item. Omit it entirely, or set it to `null`, otherwise — including for every item where `relevance` is `"None"` or `dimensions` is `[]`. Never populate `mechanism` to make a thin item look more institutionally rich than the source supports; a correctly thin result (empty `dimension_notes`, `mechanism: null`) is a valid, expected outcome, not a gap to fill.
+- **Every relationship in `mechanism.relationships` carries an explicit `status`:** `Observed` (the source states the connection directly), `Analytical Inference` (reasonably drawn from evidence in the record, with that evidence cited), or `Hypothesis` (a plausible research question or candidate explanation not yet established by the evidence, with the prompting observation cited as `evidence`). A Hypothesis is a legitimate research object — the Observatory's research process runs Observation → Pattern → Hypothesis → Model → Writing — and should be preserved with that label, never discarded merely because it isn't yet an established finding, and never written or read as if it were `Observed`.
+- **Do not treat the same fact recorded under two schema fields as independent corroborating evidence** for a relationship. An Analytical Inference must trace to evidence beyond the bare co-occurrence of two dimension tags.
+
+These two fields are optional at the schema level specifically so that the four existing Schema v1 canonical files (2026-08-29 through 2026-09-01) remain valid without modification — see Section 4.8's prohibition on retroactively touching historical records.
 
 ### 4.5 `breach_specifics` (item-level, object or `null`)
 
@@ -244,6 +281,9 @@ Section 2.6 applies Registry Abuse and LLM Misuse tracking independently ("apply
 - Do **not** generate a top-level `industry_research_reference` field.
 - Do not infer or add a JSON field merely because a similarly named section or heading exists in the TXT brief.
 - Do not modify Schema v1 to make the day's output easier to fit. If a real day's research doesn't fit the schema, that's a validation failure to report (Section 5), not a reason to loosen the contract.
+- Do **not** populate `iad_signal.dimension_notes` or `iad_signal.mechanism` to manufacture institutional richness a thin item doesn't have. A correctly thin result — `dimension_notes` omitted or `{}`, `mechanism` omitted or `null` — is a valid outcome, not a gap to fill (Section 4.4.1).
+- Do **not** write, or later treat, a `Hypothesis`-status relationship as if it were `Observed` or `Analytical Inference`. Do not discard a genuine hypothesis merely because it isn't yet an established finding — label it and preserve it (Section 4.4.1).
+- Do **not** retroactively add `dimension_notes` or `mechanism` to the existing canonical files for 2026-08-29 through 2026-09-01, or to any other historical record. These two fields are optional in Schema v1 specifically so historical records remain valid unmodified.
 
 ### 4.9 Candidate file — do not overwrite the canonical record until validated
 Write the JSON to a **candidate** path first, not directly to the day's canonical filename:
