@@ -1,8 +1,21 @@
 # Research Discovery V1
 
-Requirement 12: Research Discovery. Downstream and additive to Requirement 11's
-Research Corpus V1. Never modifies canonical CyberBrief files or Research
-Corpus V1 output; only reads them.
+**Requirement 12 -- Research Discovery.** Systematically surface non-obvious
+patterns, relationships, and anomalies from the longitudinal corpus.
+Distinguish discoveries that are new to the Observatory's own accumulated
+knowledge (internal novelty) from those that a disciplined, source-scoped
+review of external literature does not find already substantially
+articulated (external novelty), and treat neither as proof that a genuinely
+original research contribution exists. External novelty validation runs on
+researcher selection for candidates advanced toward investigation; it
+informs, but does not gate, that investigation.
+
+Downstream and additive to Requirement 11's Research Corpus V1. Never
+modifies canonical CyberBrief files or Research Corpus V1 output; only
+reads them. External novelty validation (see
+`EXTERNAL_NOVELTY_VALIDATION.md`) is downstream and additive to Research
+Discovery in the same way -- it reads `discovery_candidates.json` and never
+modifies it.
 
 ```
 Canonical CyberBrief  -->  Research Corpus (Req 11)  -->  Research Discovery (Req 12)
@@ -114,6 +127,25 @@ resolution). Writes `CyberBrief/Data/research_discovery/`. Deterministic:
 identical inputs produce identical output, including candidate IDs. Failure
 during generation leaves the last known-good output in place (candidate
 directory is validated, then promoted by rename -- never a delete-then-write).
+
+## External Novelty Validation
+
+A Discovery Candidate passing this module's novelty gate (Gate A) only
+establishes that the relationship is new *to the Observatory*. It says
+nothing about whether relevant external research, government/policy work,
+standards, or industry literature has already substantially articulated the
+same underlying relationship, and neither condition alone establishes that
+an original research contribution exists.
+
+See `EXTERNAL_NOVELTY_VALIDATION.md` for the full methodology: when
+validation runs (researcher-selected candidates only, never automatic),
+which external source families are searched, how conceptual equivalence is
+judged without relying on exact terminology, the four allowed outcomes
+(`KNOWN` / `PARTIALLY KNOWN` / `NOT FOUND` / `INDETERMINATE` -- `NOVEL` is
+never a valid outcome), and the ten-field per-candidate assessment record
+contract. Implemented in `external_novelty.py`; exercised once, on the real
+`cat-dim-coupling__signal_type-structural_shift-levers__...` candidate, in
+`CyberBrief/Data/research_discovery/external_novelty/`.
 
 ## Known V1 limitations
 
