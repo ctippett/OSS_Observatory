@@ -76,8 +76,12 @@ Apply only when events occur:
 - **LLM Misuse** — jailbreaks, poisoning, unsafe tool use, or agentic misuse.
 
 ### 2.7 Selection criteria
-- **Item count:** up to 6 significant developments first reported in the last 24 hours. Fewer is acceptable.
-- **Deduplication:** do not repeat an item unless a material update occurred. This includes checking for gaps against the prior run and handling retrospectives (multi-day catch-up briefs, named `<start>_<end>_cyberbrief_retrospective`) when a run was missed — a retrospective covers the full missed date range rather than silently dropping it.
+
+**Timezone:** all execution dates, daily periods, retrospective range boundaries, and Run Record dates use `America/Chicago` as CyberBrief's authoritative timezone — a named, DST-aware timezone (CST/CDT), never a fixed UTC offset; the correct offset varies by calendar date and must be resolved accordingly.
+
+- **Item count:** up to 6 significant developments first reported in the last 24 hours. Fewer is acceptable, and zero qualifying items is a valid, successful run — do not introduce a lower-quality or borderline story merely to avoid a zero-item brief. On a zero-item day, the TXT brief must state the zero-item result explicitly (Section 3.1), and the candidate JSON must remain schema-valid using the zero-item representation in Section 4.2.
+- **Deduplication:** do not repeat an item unless a material update occurred. Duplicate checking covers the immediately preceding canonical run plus any canonical artifact whose coverage period overlaps the current research window. An ongoing story may be included again only when there is a material new development.
+- **Retrospective boundary:** check for gaps against the prior run; when a run was missed, produce a retrospective (multi-day catch-up brief, named `<start>_<end>_cyberbrief_retrospective`) covering the full missed date range rather than silently dropping any of it. A retrospective covers only missed completed run periods. The current execution period always receives its own normal daily brief. Retrospectives repair history; they do not consume today's observation.
 - **Coverage:** aim to cover all focus areas over time; if none occurred today for an area, state that explicitly rather than forcing inclusion.
 - **Breach handling:** include at least one newly disclosed breach when present, naming affected organizations explicitly.
 - **Referent requirement:** each item must name at least one concrete referent (organization, project, foundation, government body, or adversary group); exclude items without one.
@@ -130,7 +134,7 @@ For every selected CyberBrief item, preserve the HTTP/HTTPS URL(s) of the eviden
 Write the canonical daily TXT brief using the synthesis from Section 2. This is the artifact for human review.
 
 ### 3.1 Format
-Format is canonical — do not change section structure or ordering without an explicit decision from Charles. The current section order (per recent production briefs) is: daily intelligence summary header; per-item entries (each with Summary and Extracted Statistics, and other Section 2.9 fields as written); Adversary Spotlight (when present); Registry Abuse Watch / LLM Misuse Tracker (when present); Inflection Watch; Longitudinal Arcs; Daily Narrative; end-of-brief marker.
+Format is canonical — do not change section structure or ordering without an explicit decision from Charles. The current section order (per recent production briefs) is: daily intelligence summary header; per-item entries (each with Summary and Extracted Statistics, and other Section 2.9 fields as written); Adversary Spotlight (when present); Registry Abuse Watch / LLM Misuse Tracker (when present); Inflection Watch; Longitudinal Arcs; Daily Narrative; end-of-brief marker. On a day with zero qualifying items (Section 2.7), the brief must state that result explicitly rather than omitting explanation or silently shipping a shorter brief.
 
 ### 3.2 IAD LENS (TXT-only)
 The TXT brief may carry a day-level **"IAD LENS"** line or section — an analytical throughline for the day, in prose. This is a TXT presentation element only.
@@ -158,6 +162,7 @@ Per `cyberbrief.schema.json`:
 - Optional, include when applicable, `null` when not: `micro_tracking`, `inflection_watch`, `longitudinal_arcs`, `daily_narrative`, `adversary_spotlight`, `strategic_insights`.
 - `adversary_spotlight`'s and `micro_tracking`'s required internal shapes, when either is present, are fixed and fully required — see Section 4.6 and Section 4.7 respectively.
 - No other top-level keys are permitted (`additionalProperties: false`).
+- **Zero-item day (Section 2.7):** the candidate JSON remains schema-valid with `"items": []` and `"signal_counts"` set to `{"structural_shift": 0, "policy_evolution": 0, "incident": 0}` — `cyberbrief.schema.json` imposes no minimum on `items` and only `minimum: 0` on each `signal_counts` field, so this requires no schema change.
 
 ### 4.3 Required item shape
 Each entry in `items` requires: `title`, `date`, `source`, `source_urls` (array of one or more HTTP/HTTPS evidence URLs — see Section 2.16 for what to preserve; `source` stays the human-readable source/outlet field, `source_urls` is separate and required), `domain`, `surface`, `signal_type` (`Incident` | `Policy Evolution` | `Structural Shift`), `half_life` (`Short` | `Medium` | `Long`), `ai_impact` (`None` | `Enabling` | `Amplifying` | `Governing` | `Targeted`), `arc`, `iad_signal`, `summary`, `extracted_statistics` (array, may be empty), `breach_specifics` (object or `null` — required internal shape specified in Section 4.5). No other item keys are permitted.
@@ -413,8 +418,11 @@ Same date-naming convention and same `CyberBrief/Data/` location as the canonica
 
 Create the run record first, before Section 2 (Research) begins, with:
 
-- `Run started` — current timestamp, ISO 8601 with timezone offset.
+- `Run started` — current timestamp, ISO 8601 with timezone offset, in CyberBrief's authoritative timezone `America/Chicago` (Section 2.7) — a named, DST-aware timezone, not a fixed UTC offset.
 - `Run type` — `Daily` or `Retrospective (<start>–<end>)`.
+- `Provider` — the organization/vendor supplying the LLM executing this run (e.g., `Anthropic`).
+- `Model` — the specific model identifier used for this run (e.g., `claude-sonnet-5`), not a family name or marketing label. If the runtime does not expose a specific model identifier, record `unknown` rather than guessing.
+- `Execution environment` — how the run was executed (e.g., `Cowork interactive session`, `scheduled task`, `standalone script`), plus a session or run identifier where available.
 - `Workflow ref` — `OSS_Observatory/cyberbrief_production_workflow.md`.
 - `Workflow commit` — the current Git commit hash of the OSS_Observatory repository, captured via `git -C OSS_Observatory rev-parse HEAD` (or the equivalent invocation from the run's working directory). If the repository or command is unavailable, record `unknown` rather than blocking the run.
 - The nine-stage checklist below (Section 12.3), all stages initially marked `PENDING`.
@@ -488,8 +496,11 @@ The run record is written and updated regardless of validation outcome. Unlike t
 ```
 # CyberBrief Run Record — YYYY-MM-DD
 
-Run started:      YYYY-MM-DDTHH:MM:SS±TZ
+Run started:      YYYY-MM-DDTHH:MM:SS±TZ (America/Chicago)
 Run type:         Daily
+Provider:         <e.g. Anthropic | unknown>
+Model:            <model identifier | unknown>
+Execution environment: <e.g. Cowork interactive session | scheduled task | standalone script>
 Workflow ref:     OSS_Observatory/cyberbrief_production_workflow.md
 Workflow commit:  <git commit hash | unknown>
 
