@@ -352,7 +352,13 @@ Only after a successful validation and promotion (Section 5.1):
 - Update `CyberBrief/Briefs/MORNING_BRIEF.md` with the day's brief summary and archive index entry.
 - Update `CyberBrief/Data/LongHalfLife/LongHalfLife_Tracker_May2026.xlsx` with any new Structural Shift (Long Half-Life) items from today's run.
 
-If the tracker file is locked (e.g. open in Excel — check for a `.~lock.*#` file alongside it before writing), do not force a write; note it in the run's presentation output and let Charles know it needs to be updated once the file is closed.
+If no lock file (e.g. a `.~lock.*#` file alongside the workbook, as created by Excel/LibreOffice) is present, proceed normally. If a lock file is present, do not treat its mere presence as sufficient to skip: compare its modification time to the tracker workbook's own modification time.
+
+- If the workbook's modification time is **later** than the lock file's modification time, treat the lock as stale/orphaned — a successful workbook write demonstrably occurred after the lock was created. Proceed with the tracker write via openpyxl, verify the appended row by re-reading the workbook, and record the stale-lock reasoning (both timestamps) in the Run Record.
+- If the workbook is **not** newer than the lock file, timestamps are unavailable, or the comparison is otherwise inconclusive, treat the lock as potentially active: do not force a write; note it in the run's presentation output and let Charles know it needs to be updated once the file is closed.
+- Never delete the lock file as part of normal CyberBrief production, regardless of which branch above applies.
+
+Uncertainty defaults to skipping the write — this rule only ever permits a write when there is positive evidence (a later workbook modification time) that the lock has already been safely written through before.
 
 Update the run record (Section 12.3) for each of the two trackers independently: mark stage 7 (MORNING_BRIEF.md update) and stage 8 (Long Half-Life tracker update) each `DONE` or `SKIPPED (<reason>)`. A locked tracker is recorded on its own line, e.g. `SKIPPED (locked: .~lock.LongHalfLife_Tracker_May2026.xlsx#)` — this is the durable record of the skip, in addition to telling Charles in the run's presentation output.
 
