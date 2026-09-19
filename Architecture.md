@@ -78,7 +78,7 @@ No schema, database, index, scoring, tagging, extraction, summarization, or auto
 
 Research Interaction Conventions
 Three conversational shorthand phrases are established for working with a research conversation:
-	•	"Run today's brief." Present the completed CyberBrief for the current production day and begin the research conversation.
+	•	"Run today's brief." Present the completed CyberBrief for the current production day and begin the research conversation, rendered in the screen-presentation format required by cyberbrief_production_workflow.md Section 8.3.
 	•	"Preserve this discussion." Preserve the research conversation substantially intact in research_conversations/, using the provenance and preservation rules above.
 	•	"Move this to modeling." Preserve the relevant thinking for later continuation in a modeling context, without declaring or creating a model, model candidate, Models Ledger entry, status, flag, classification, or other modeling artifact.
 These are conversational shorthand, not required syntax. An equivalent natural-language request should be interpreted according to the same intent, whatever its exact wording. Lookbacks and other research inquiries remain ordinary natural-language requests and require no prescribed syntax.

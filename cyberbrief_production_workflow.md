@@ -373,10 +373,10 @@ Present the brief to Charles as today's CyberBrief. The conversational screen pr
 
 CyberBrief operates in two complementary temporal modes, and the two are not required to co-occur:
 
-- **Unattended research continuity** — the scheduled production run (Sections 1-7, 12) executes on its own, independent of whether anyone is present to discuss it. Research must happen on its correct production day regardless of conversational participation.
+- **Manually initiated research continuity** — a CyberBrief run (Sections 1-7, 12) is presently initiated manually (for example, an explicit request such as "Run today's brief"), not by autonomous or scheduled initiation; autonomous/scheduled initiation is deferred and is not the current operating mode. Once initiated, production proceeds independently of whether anyone is present to discuss it, and research must still happen on its correct production day regardless of later conversational participation.
 - **Attended research conversation** — a conversation about a brief (Section 8.2) may begin immediately after production or considerably later, including a conversation about an already-completed brief from a prior day.
 
-Conversational participation is never a prerequisite for scheduled production. A day with no conversation still produces a complete, valid brief; a conversation days later is still a legitimate way to engage with it.
+Conversational participation is never a prerequisite for production once initiated. A day whose production was initiated still produces a complete, valid brief with no conversation about it; a conversation days later is still a legitimate way to engage with it.
 
 ### 8.2 Conversation as the primary research interface
 
@@ -437,7 +437,7 @@ These are the existing production locations and naming conventions. This workflo
 
 ## 10. Scope boundary (what this workflow does not do)
 
-- Does not touch or replace the existing scheduled CyberBrief task.
+- Does not touch or replace any scheduled-task configuration for CyberBrief; production is currently manually initiated, not autonomous or scheduled (Section 8.1).
 - Does not delete, move, archive, or modify historical CyberBrief JSON/TXT/CSV records, historical prompt files, or the older duplicate `Canonical_CyberBrief_Schema_v1.md` under `CyberBrief/Scripts/`.
 - Does not commit or push anything in `OSS_Observatory/` to version control on its own initiative.
 - Legacy cleanup (retiring the `CyberBrief/Scripts/` duplicate schema, retiring superseded `CyberBrief/Prompts/*` files, deciding what if anything moves) happens only after this workflow has produced and validated a real CyberBrief end-to-end, and only on explicit direction.
@@ -446,7 +446,7 @@ These are the existing production locations and naming conventions. This workflo
 
 ## 11. Scheduled task launcher (for reference — do not duplicate this file into the task)
 
-The scheduled task, and any manual Cowork run, should use this file as sole authoritative instructions. The scheduled task's own prompt should contain only a minimal launcher, not a second copy of this workflow:
+Any scheduled task configured for CyberBrief production, like any manual Cowork run, should use this file as sole authoritative instructions. Production is currently manually initiated (Section 8.1) — no scheduled task is presently operating. If a scheduled task is configured, its prompt should contain only a minimal launcher, not a second copy of this workflow:
 
 > Read and follow the complete production workflow at `OSS_Observatory/cyberbrief_production_workflow.md` (absolute path: `/Users/charles.tippett/Documents/DoGoodData/OSS_Observatory/cyberbrief_production_workflow.md`). Treat that file as the authoritative and complete operating instructions for this CyberBrief run. If you do not have file access to that path yet, request access to `/Users/charles.tippett/Documents/DoGoodData` before proceeding.
 
