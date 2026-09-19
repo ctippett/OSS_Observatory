@@ -111,6 +111,7 @@ Every run's Run Record must capture exactly six provenance fields, regardless of
 - **Do not replace Claude.** Claude/Cowork remains the production runtime. This contract exists to describe the boundary Claude already sits behind, not to justify or schedule a provider swap.
 - **Do not modify deterministic post-validation scripts.** `validators/cyberbrief_validator.py`, `research_corpus/`, `research_discovery/`, and `research_workbench/` are unaffected by, and unaware of, which runtime produced the candidate JSON they consume.
 - **Do not let a second provider under evaluation touch production state.** Per Section 4's production-designation rule, an experimental or comparison implementation is out of scope for writing, promoting, or influencing any canonical artifact, tracker, or research-state file — its entire footprint must be confined to its own provider-specific test location.
+- **Do not require a universal or provider-neutral conversational presentation.** Provider independence under this contract applies to the execution boundary, the canonical research structure, validation requirements, and the durable research artifacts (Section 3) — not to the conversational interface a provider uses to present or discuss its own completed execution. A certified provider may present and discuss its own execution in its own native conversational environment. Presentation differences across providers need not be normalized into a common UI, dashboard, or application layer.
 
 ---
 

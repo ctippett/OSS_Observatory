@@ -79,12 +79,13 @@ Apply only when events occur:
 
 **Timezone:** all execution dates, daily periods, retrospective range boundaries, and Run Record dates use `America/Chicago` as CyberBrief's authoritative timezone — a named, DST-aware timezone (CST/CDT), never a fixed UTC offset; the correct offset varies by calendar date and must be resolved accordingly.
 
-- **Item count:** up to 6 significant developments first reported in the last 24 hours. Fewer is acceptable, and zero qualifying items is a valid, successful run — do not introduce a lower-quality or borderline story merely to avoid a zero-item brief. On a zero-item day, the TXT brief must state the zero-item result explicitly (Section 3.1), and the candidate JSON must remain schema-valid using the zero-item representation in Section 4.2.
+- **Item count:** target 6-8 developments per day — this range reflects what one practitioner can actually absorb in a single sitting: enough to stay current, not so much it becomes noise. This is a target, not a quota: fewer items, including zero, remains a valid, successful run whenever fewer genuinely informative developments exist (see Informativeness, below). Never pad the brief with a lower-quality or borderline story merely to reach the target. On a zero-item day, the TXT brief must state the zero-item result explicitly (Section 3.1), and the candidate JSON must remain schema-valid using the zero-item representation in Section 4.2.
+- **Informativeness (the daily-selection standard):** select an item because it is real, sourced, timely — first reported or meaningfully advanced in the last 24 hours — and genuinely worth an AppSec practitioner knowing about today. This is the operative test for what goes in the daily brief. It is independent of an item's signal-type classification (Section 2.4) and independent of its eligibility for Long Half-Life tracker promotion (Section 7): those govern what gets tracked longitudinally, not what gets reported today. Incident, Policy Evolution, and Structural Shift retain their existing analytical meanings and are assigned on their own terms (Section 2.4), not as a gate on daily inclusion.
 - **Deduplication:** do not repeat an item unless a material update occurred. Duplicate checking covers the immediately preceding canonical run plus any canonical artifact whose coverage period overlaps the current research window. An ongoing story may be included again only when there is a material new development.
 - **Retrospective boundary:** check for gaps against the prior run; when a run was missed, produce a retrospective (multi-day catch-up brief, named `<start>_<end>_cyberbrief_retrospective`) covering the full missed date range rather than silently dropping any of it. A retrospective covers only missed completed run periods. The current execution period always receives its own normal daily brief. Retrospectives repair history; they do not consume today's observation.
 - **Coverage:** aim to cover all focus areas over time; if none occurred today for an area, state that explicitly rather than forcing inclusion.
 - **Breach handling:** include at least one newly disclosed breach when present, naming affected organizations explicitly.
-- **Referent requirement:** each item must name at least one concrete referent (organization, project, foundation, government body, or adversary group); exclude items without one.
+- **Referent requirement:** not a universal condition for daily inclusion — an item may be selected without naming a concrete referent if it is otherwise real, sourced, timely, and informative (see Informativeness, above). This is unchanged where an existing downstream mechanism genuinely requires one: Structural Shift classification (Section 2.4) independently requires a specific, observable action or decision by a named organization, project, or governing body as part of its own definition, and that requirement continues to govern Structural Shift classification and Long Half-Life tracker eligibility (Section 7).
 - **Industry research inclusion:** include major industry or vendor research only on its initial publication day, as a single item.
 
 ### 2.8 Adversary Spotlight (conditional)
@@ -122,7 +123,7 @@ Research should cover the established CyberBrief source universe below as a cove
 Use evidence appropriate to the claim. Prefer primary and authoritative sources when available. Use credible secondary reporting for discovery and context. Corroborate material claims when the underlying evidence is uncertain, disputed, indirect, or based primarily on secondary reporting. This is a governing principle, not a mechanical two-source requirement.
 
 ### 2.15 Collection versus selection
-Source discovery and research (Sections 2.13-2.14) produces candidate developments, not final signals. The existing selection criteria in Section 2.7 — unchanged, including the up-to-6-items guidance ("fewer is acceptable") — determine which candidates become final CyberBrief items.
+Source discovery and research (Sections 2.13-2.14) produces candidate developments, not final signals. The existing selection criteria in Section 2.7 — including the 6-8-item guidance and the informativeness standard — determine which candidates become final CyberBrief items.
 
 ### 2.16 Evidence preservation (source URLs)
 For every selected CyberBrief item, preserve the HTTP/HTTPS URL(s) of the evidence actually used to support that observation — not every page encountered during research, only evidence materially used to support the selected observation. These URLs become the item's required `source_urls` array in the canonical JSON record (Section 4.3). `source` remains the separate human-readable source/outlet field; `source_urls` holds one or more supporting evidence URLs.
@@ -366,7 +367,51 @@ Update the run record (Section 12.3) for each of the two trackers independently:
 
 ## 8. Present the finished brief
 
-Present the brief to Charles as today's CyberBrief. State plainly which of the three artifacts (TXT, JSON, CSV) were produced and, if the JSON failed validation, that the run is incomplete pending a fix — do not present a partial or invalid run as a normal, successful one.
+Present the brief to Charles as today's CyberBrief. The conversational screen presentation (Section 8.3) is the primary human-consumption view of the completed run. State plainly which of the three artifacts (TXT, JSON, CSV) were produced and, if the JSON failed validation, that the run is incomplete pending a fix — do not present a partial or invalid run as a normal, successful one.
+
+### 8.1 Two temporal modes
+
+CyberBrief operates in two complementary temporal modes, and the two are not required to co-occur:
+
+- **Unattended research continuity** — the scheduled production run (Sections 1-7, 12) executes on its own, independent of whether anyone is present to discuss it. Research must happen on its correct production day regardless of conversational participation.
+- **Attended research conversation** — a conversation about a brief (Section 8.2) may begin immediately after production or considerably later, including a conversation about an already-completed brief from a prior day.
+
+Conversational participation is never a prerequisite for scheduled production. A day with no conversation still produces a complete, valid brief; a conversation days later is still a legitimate way to engage with it.
+
+### 8.2 Conversation as the primary research interface
+
+The LLM conversation — not the TXT file — is CyberBrief's primary human-consumption interface. Its purpose is to create intellectual affordances that a static file cannot: read, notice, question, investigate, connect, reconsider, develop. This is a research interaction pattern, not a required workflow or a state machine with defined steps — a conversation may use as much or as little of it as the moment calls for.
+
+This does not diminish the TXT, canonical JSON, or CSV roll-up (Sections 3-6): they keep their existing purposes unchanged as the durable, non-conversational record of each run.
+
+### 8.3 Screen presentation format
+
+Render the completed brief to the screen as follows. This is a derived rendering of the completed analysis, not a fourth canonical artifact — it requires no additional research, creates no new canonical research state, does not alter the analysis, classifications, or fields Section 2 already produced, and does not replace the TXT, canonical JSON, CSV roll-up, Run Record, or trackers.
+
+- **Open with signal counts and a concise synthesis** — the day's Structural Shift / Policy Evolution / Incident counts and total, followed by one short statement of what kind of day this was.
+- **Read first (up to 3):** surface up to three developments that most deserve attention first, each with a compact explanation and an explicit "Why it matters" statement. Choosing which items lead is a presentation judgment only — it does not reclassify, promote, or otherwise change an item's signal type, half-life, or any other field from Section 2's analysis.
+- **Remaining developments as scan-level entries:** one compact entry per remaining item, each carrying its single most decision-useful fact, statistic, or implication.
+- **Compact closing sections**, only when the day's brief has content for them: Inflection Watch, material Longitudinal Arc movement (the arcs that actually moved today, not every defined arc), and Adversary Spotlight.
+- **Preserve every selected item.** The screen presentation reorders and compresses for readability; it never drops, merges, or silently excludes a selected development.
+- **Suppress empty, redundant, or non-informative fields** — null fields should not appear on screen. Negative-result fields (e.g., no registry-abuse activity today) should normally be omitted as well, unless the absence itself is materially informative in the context of the day's analysis.
+- **Do not reproduce the full TXT structure** — the screen presentation is a distinct, denser layout for rapid reading, not a re-formatted copy of Section 3's format.
+- **A quiet day stays quiet.** Do not expand, embellish, or pad the screen presentation to make a low-item or zero-item day appear more substantial than it was.
+
+This format governs the screen presentation only. It does not change Sections 3-7 or their artifacts, and it introduces no new schema, validator, script, database, or file.
+
+### 8.4 Presentation and production are temporally separable
+
+Presenting or discussing a brief may happen immediately after production or later, against an already-completed canonical CyberBrief. Beginning a later conversation about a prior day's brief must never rerun production, redo research, re-promote artifacts, or duplicate tracker updates — the completed run remains the single source, and the conversation is read-only against it unless Charles explicitly asks for something new.
+
+Phrases like "Run today's brief" or "Discuss Monday's brief" are illustrative only — this is not a formal command language, parser, or prompt catalog. Additional conversational modes (7-day or 30-day lookbacks, a hacking-focused pass, a governance-focused pass, IAD or sub-IAD framing, forward-looking inquiry) are expected to emerge from actual use and are not formalized now.
+
+### 8.5 Provider independence and conversational presentation
+
+Provider independence, as established elsewhere in this workflow and in the LLM Execution Contract, applies to the execution boundary, the canonical research structure, validation requirements, and the durable research artifacts (Section 3). It does not require a universal or provider-neutral conversational UI.
+
+A certified provider presents and discusses its own completed execution in its own native conversational environment — Claude presents Claude's own execution, and a future second or third provider would do the same in theirs. This workflow does not require a common UI, dashboard, blog, presentation service, or application layer built solely to normalize presentation across providers. Presentation differences across providers are not automatically normalized away; they may become useful analytical variance rather than a defect to correct.
+
+This section does not change the Analytical Variance Framework (AVF). AVF tracks analytical variance between independent CyberBrief executions across its own pipeline (Evidence → Selection → Classification → Interpretation → Longitudinal Meaning); researcher interaction is a different object and is not tracked as an additional AVF stage. Interaction is instead preserved through the research-conversation corpus (research/RESEARCH_MILESTONES.md, Architecture.md Section 8), not through AVF.
 
 Finalize the run record (Section 12.7): add the `Run completed` timestamp and confirm stage 9 (Brief presentation) is marked `DONE`, and that the other eight stage lines already reflect the run's actual outcome. Confirm also that Execution Notes (Section 12.4) reflects every material event from the run, not just the final state.
 
