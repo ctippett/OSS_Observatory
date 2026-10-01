@@ -1,0 +1,1 @@
+Read `Architecture.md` (Section 8, "Research Interaction Conventions") before treating "Run today's brief," "Preserve this discussion," or "Move this to modeling" as ordinary requests — these are established conversational shorthand with specific, documented behavior. See `cyberbrief_production_workflow.md` for CyberBrief production itself.
