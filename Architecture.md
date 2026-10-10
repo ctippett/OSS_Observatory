@@ -82,6 +82,7 @@ Three conversational shorthand phrases are established for working with a resear
 	•	"Preserve this discussion." Preserve the research conversation substantially intact in research_conversations/, using the provenance and preservation rules above.
 	•	"Move this to modeling." Preserve the relevant thinking for later continuation in a modeling context, without declaring or creating a model, model candidate, Models Ledger entry, status, flag, classification, or other modeling artifact.
 These are conversational shorthand, not required syntax. An equivalent natural-language request should be interpreted according to the same intent, whatever its exact wording. Lookbacks and other research inquiries remain ordinary natural-language requests and require no prescribed syntax.
+Research Conversation Git Close: Preserved research conversations are committed and pushed to the OSS Observatory repository at the end of the research day. Multiple conversations from the same day may be committed together. Days with no newly preserved conversations require no action.
 
 9. Modeling and Automation Boundary
 This section extends the Operating Principle (Section 6); it does not restate it.
